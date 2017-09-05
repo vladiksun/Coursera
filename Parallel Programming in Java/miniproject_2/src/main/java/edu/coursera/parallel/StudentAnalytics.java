@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -105,7 +106,26 @@ public final class StudentAnalytics {
      */
     public String mostCommonFirstNameOfInactiveStudentsParallelStream(
             final Student[] studentArray) {
-        throw new UnsupportedOperationException();
+
+        String mostCommon = Stream.of(studentArray)
+                .parallel()
+                .filter(student -> !student.checkIsCurrent())
+                .collect(Collectors.groupingBy(Student::getFirstName,
+                         Collectors.counting()))
+                .entrySet()
+                .parallelStream()
+                .max((o1, o2) -> {
+                        if (o1.getValue() > o2.getValue()) {
+                            return 1;
+                        } else if (o1.getValue() < o2.getValue()) {
+                            return -1;
+                        } else {
+                            return 0;
+                        }
+                    }).get().getKey();
+
+
+        return mostCommon;
     }
 
     /**
